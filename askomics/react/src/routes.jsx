@@ -25,6 +25,7 @@ import AskoNavbar from './navbar'
 import AskoFooter from './footer'
 import Contact from './contact'
 import Overview from './routes/overview/overview'
+import ConstraintOverview from './routes/constraint/constraint_overview'
 
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -54,7 +55,7 @@ export default class Routes extends Component {
         ontologies: [],
         singleTenant: false,
         autocompleteMaxResults: 10,
-        anonymousQuery: false
+        anonymousQuery: false,
       }
     }
     this.cancelRequest
@@ -128,6 +129,7 @@ export default class Routes extends Component {
             <Route path="/password_reset" component={(props) => <PasswordReset config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} {...props}/>}/>
             <Route path="/account" exact component={() => (<Account config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} />)} />
             <Route path="/admin" exact component={() => (<Admin config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} />)} />
+            <Route path="/constraints" exact component={() => (<ConstraintOverview config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} />)} />
             <Route path="/prefixes" exact component={() => (<Prefixes config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} />)} />
             <Route path="/ontologies" exact component={() => (<Ontologies config={this.state.config} waitForStart={this.state.waiting} setStateNavbar={p => this.setState(p)} />)} />
             <Route path="/query" exact component={Query} />

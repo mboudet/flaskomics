@@ -7,11 +7,11 @@ import WaitingDiv from '../../components/waiting'
 import update from 'react-addons-update'
 import Utils from '../../classes/utils'
 import PropTypes from 'prop-types'
-import { ForceGraph2D, ForceGraph3D } from 'react-force-graph';
+import { ForceGraph2D } from 'react-force-graph';
 import { SizeMe } from 'react-sizeme';
-import SpriteText from 'three-spritetext';
 import Switch from 'rc-switch';
 import "rc-switch/assets/index.css";
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
 export default class ConstraintOverview extends Component {
 
@@ -26,18 +26,22 @@ export default class ConstraintOverview extends Component {
       },
       highlightNodes: new Set(),
       highlightLinks: new Set(),
-      hoverNode: null
+      hoverNode: null,
+      rightClickedNode: null
     }
     this.cancelRequest
+    this.contextTrigger = null
+    this.firstRender = true
     this.myRef = React.createRef();
     this.draw2DNode = this.draw2DNode.bind(this)
-    this.onNodeHover = this.onNodeHover.bind(this)
-    this.onLinkHover = this.onLinkHover.bind(this)
     this.getUniqueLinkId = this.getUniqueLinkId.bind(this)
     this.zoom = this.zoom.bind(this)
     this.zoomOut = this.zoomOut.bind(this)
     this.focus = this.focus.bind(this)
-    this.firstRender = true
+    this.handleClick = this.handleClick.bind(this)
+    this.handleRightClick = this.handleRightClick.bind(this)
+    this.constraintNodeAttributes = this.constraintNodeAttributes.bind(this)
+
   }
 
   draw2DNode (node, ctx, globalScale){
@@ -140,49 +144,10 @@ export default class ConstraintOverview extends Component {
 
     })
 
-    let links
-    if (!this.state.is2D){
-      links = this.getLinks3D(counts)
-    } else {
-      links = this.getLinks2D(counts)
-    }
+    let links = this.getLinks2D(counts)
 
     this.setState({
       graphState: {nodes: nodes, links: links}
-    })
-  }
-
-  onLinkHover(link){
-    let highlightNodes = new Set();
-    let highlightLinks = new Set();
-
-    if (link) {
-      highlightLinks.add(this.getUniqueLinkId(link));
-      highlightNodes.add(link.source.id);
-      highlightNodes.add(link.target.id);
-    }
-
-    this.setState({
-      highlightNodes: highlightNodes,
-      highlightLinks: highlightLinks
-    })
-  }
-
-  onNodeHover(node) {
-    let highlightNodes = new Set();
-    let highlightLinks = new Set();
-    let hoverNode = null
-
-    if (node) {
-      highlightNodes.add(node);
-      node.neighbors.forEach(neighbor => highlightNodes.add(neighbor));
-      node.links.forEach(link => highlightLinks.add(link));
-      hoverNode = node.id
-    }
-    this.setState({
-      highlightNodes: highlightNodes,
-      highlightLinks: highlightLinks,
-      hoverNode: hoverNode
     })
   }
 
@@ -233,21 +198,32 @@ export default class ConstraintOverview extends Component {
   }
 
   zoomOut(){
-    if (this.state.is2D){
-      this.myRef.current.zoomToFit(1000, 80)
-    } else {
-      this.myRef.current.zoomToFit(1000, 0)
-    }
+    this.myRef.current.zoomToFit(1000, 80)
   }
 
   focus (node){
-    if (this.state.is2D){
-      this.myRef.current.centerAt(node.x, node.y, 2000).zoom(5,2000)
+    this.myRef.current.centerAt(node.x, node.y, 2000).zoom(5,2000)
+  }
+
+  handleClick(clickedNode, event){
+    if (event.ctrlKey) {
+      console.debug("Ctrl+click has just happened!");
     } else {
-      const distance = 100;
-      const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-      this.myRef.current.cameraPosition({ x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, node, 3000);
+      this.focus(clickedNode)
     }
+  }
+
+  handleRightClick(clickedNode, event) {
+    if (this.contextTrigger) {
+      this.setState({
+        rightClickedNode: clickedNode
+      })
+      this.contextTrigger.handleContextClick(event)
+    }
+  }
+
+  constraintNodeAttributes(event, data){
+    console.log(data)
   }
 
   render () {
@@ -282,15 +258,22 @@ export default class ConstraintOverview extends Component {
           linkCurveRotation="rotation"
           backgroundColor="Gainsboro"
           nodeCanvasObject={this.draw2DNode}
-          onNodeHover={this.onNodeHover}
-          onLinkHover={this.onLinkHover}
-          onNodeClick={this.focus}
+          onNodeRightClick={this.handleRightClick}
+          onNodeClick={this.handleClick}
           linkWidth={link => this.state.highlightLinks.has(this.getUniqueLinkId(link)) ? 5 : 1}
-          linkDirectionalParticles = {4}
-          linkDirectionalParticleWidth = {link => this.state.highlightLinks.has(this.getUniqueLinkId(link)) ? 4 : 0}
         />
       )}
       </SizeMe>
+      <div>
+        <ContextMenuTrigger id="context-menu-1" ref={c => this.contextTrigger = c}>
+        </ContextMenuTrigger>
+
+        <ContextMenu id="context-menu-1">
+          <MenuItem data={{node: this.state.rightClickedNode}} onClick={this.constraintNodeAttributes}>
+            Constraint node attributes
+          </MenuItem>
+        </ContextMenu>
+      </div>
       </>
     )
 
