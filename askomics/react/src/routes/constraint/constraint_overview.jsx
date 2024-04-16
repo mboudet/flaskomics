@@ -27,7 +27,8 @@ export default class ConstraintOverview extends Component {
       highlightNodes: new Set(),
       highlightLinks: new Set(),
       hoverNode: null,
-      rightClickedNode: null
+      rightClickedNode: null,
+      constraints: {}
     }
     this.cancelRequest
     this.contextTrigger = null
