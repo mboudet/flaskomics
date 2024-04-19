@@ -282,12 +282,19 @@ export default class ConstraintOverview extends Component {
       <div className="container">
         <h2>Abstraction visualization</h2>
         <hr />
+        <Row>
+        <Col xs="7">
         Drag and scroll to interact with the graph. Click on a node to focus.
         <Button style={{float: "right"}} onClick={this.zoomOut}>Reset zoom</Button>
         <br/>
         <WaitingDiv waiting={this.state.waiting} center />
         <br />
         {graph}
+        </Col>
+        <Col xs="5">
+
+        </Col>
+        </Row>
         <ErrorDiv status={this.state.status} error={this.state.error} errorMessage={this.state.errorMessage}/>
       </div>
     )
