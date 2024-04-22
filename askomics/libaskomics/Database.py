@@ -512,13 +512,13 @@ class Database(Params):
         except Exception:
             pass
 
-        def create_constraints_table(self):
-            """Create the constraints table"""
-            query = '''
-            CREATE TABLE IF NOT EXISTS constraints (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                uri text NOT NULL,
-                json text NOT NULL
-            )
-            '''
-            self.execute_sql_query(query)
+    def create_constraints_table(self):
+        """Create the constraints table"""
+        query = '''
+        CREATE TABLE IF NOT EXISTS constraints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uri text NOT NULL,
+            json text NOT NULL
+        )
+        '''
+        self.execute_sql_query(query)

@@ -26,21 +26,20 @@ export default class EntityConstraintsBox extends Component {
 
   render () {
     form = (
-        <table style={{ width: '100%' }}>
-          <tr>
-            <td>
-              {this.props.entityConstraint.entityName}
-            </td>
-            <td>
-              <ButtonGroup>
-                <Button id={this.props.entityConstraints.id} size="sm" color="secondary" onClick={this.editConstraints}>Edit</Button>
-                <Button id={this.props.entityConstraints.id} size="sm" color="danger" onClick={this.removeConstraints}>Remove</Button>
-              </ButtonGroup>
-            </td>
-          </tr>
-        </table>
-      )
-    }
+      <table style={{ width: '100%' }}>
+        <tr>
+          <td>
+            {this.props.entityConstraint.entityName}
+          </td>
+          <td>
+            <ButtonGroup>
+              <Button id={this.props.entityConstraints.id} size="sm" color="secondary" onClick={this.editConstraints}>Edit</Button>
+              <Button id={this.props.entityConstraints.id} size="sm" color="danger" onClick={this.removeConstraints}>Remove</Button>
+            </ButtonGroup>
+          </td>
+        </tr>
+      </table>
+    )
 
     return (
       <div className="attribute-box">

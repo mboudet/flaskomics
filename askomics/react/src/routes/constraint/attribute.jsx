@@ -131,29 +131,28 @@ export default class AttributeBox extends Component {
     }
 
     form = (
-        <table style={{ width: '100%' }}>
-          <tr>
-            <td>
-              <CustomInput disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleFilterType}>
-                {Object.keys(selected).map(type => {
-                  return <option key={type} selected={selected[type]} value={type}>{type}</option>
-                })}
-              </CustomInput>
-            </td>
-            <td>
-              <CustomInput disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleNegative}>
-                {Object.keys(selected_sign).map(type => {
-                  return <option key={type} selected={selected_sign[type]} value={type}>{type}</option>
-                })}
-              </CustomInput>
-            </td>
-            <td>
-              {input}
-            </td>
-          </tr>
-        </table>
-      )
-    }
+      <table style={{ width: '100%' }}>
+        <tr>
+          <td>
+            <CustomInput disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleFilterType}>
+              {Object.keys(selected).map(type => {
+                return <option key={type} selected={selected[type]} value={type}>{type}</option>
+              })}
+            </CustomInput>
+          </td>
+          <td>
+            <CustomInput disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleNegative}>
+              {Object.keys(selected_sign).map(type => {
+                return <option key={type} selected={selected_sign[type]} value={type}>{type}</option>
+              })}
+            </CustomInput>
+          </td>
+          <td>
+            {input}
+          </td>
+        </tr>
+      </table>
+    )
 
     return (
       <div className="attribute-box">
@@ -194,29 +193,28 @@ export default class AttributeBox extends Component {
     let numberOfFilters = this.props.attribute.filters.length - 1
 
     form = (
-        <table style={{ width: '100%' }}>
-        {this.props.attribute.filters.map((filter, index) => {
-          return (
-            <tr key={index}>
-              <td key={index}>
-                <CustomInput key={index} data-index={index} disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleFilterNumericSign}>
-                  {Object.keys(sign_display).map(sign => {
-                    return <option key={sign} selected={filter.filterSign == sign ? true : false} value={sign}>{sign_display[sign]}</option>
-                  })}
-                </CustomInput>
+      <table style={{ width: '100%' }}>
+      {this.props.attribute.filters.map((filter, index) => {
+        return (
+          <tr key={index}>
+            <td key={index}>
+              <CustomInput key={index} data-index={index} disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleFilterNumericSign}>
+                {Object.keys(sign_display).map(sign => {
+                  return <option key={sign} selected={filter.filterSign == sign ? true : false} value={sign}>{sign_display[sign]}</option>
+                })}
+              </CustomInput>
+            </td>
+              <td>
+                <div className="input-with-icon">
+                  <Input data-index={index} className="input-with-icon" disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={filter.filterValue} onChange={this.handleFilterNumericValue} />
+                  {index == numberOfFilters ? <button className="input-with-icon"><i className="attr-icon fas fa-plus inactive" id={this.props.attribute.id} onClick={this.toggleAddNumFilter}></i></button> : <></>}
+                </div>
               </td>
-                <td>
-                  <div className="input-with-icon">
-                    <Input data-index={index} className="input-with-icon" disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={filter.filterValue} onChange={this.handleFilterNumericValue} />
-                    {index == numberOfFilters ? <button className="input-with-icon"><i className="attr-icon fas fa-plus inactive" id={this.props.attribute.id} onClick={this.toggleAddNumFilter}></i></button> : <></>}
-                  </div>
-                </td>
-            </tr>
-          )
-        })}
-        </table>
-      )
-    }
+          </tr>
+        )
+      })}
+      </table>
+    )
 
     return (
       <div className="attribute-box">
@@ -256,16 +254,15 @@ export default class AttributeBox extends Component {
     let form
 
     form = (
-        <FormGroup>
-          <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
-            {this.props.attribute.filterValues.map(value => {
-              let selected = this.props.attribute.filterSelectedValues.includes(value.uri)
-              return (<option key={value.uri} value={value.uri} selected={selected}>{value.label}</option>)
-            })}
-          </CustomInput>
-        </FormGroup>
-      )
-    }
+      <FormGroup>
+        <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
+          {this.props.attribute.filterValues.map(value => {
+            let selected = this.props.attribute.filterSelectedValues.includes(value.uri)
+            return (<option key={value.uri} value={value.uri} selected={selected}>{value.label}</option>)
+          })}
+        </CustomInput>
+      </FormGroup>
+    )
 
     return (
       <div className="attribute-box">
@@ -301,14 +298,13 @@ export default class AttributeBox extends Component {
     let form
 
     form = (
-        <FormGroup>
-          <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
-            <option key="true" value="true" selected={this.props.attribute.filterSelectedValues.includes("true")}>True</option>
-            <option key="false" value="false" selected={this.props.attribute.filterSelectedValues.includes("false")}>False</option>
-          </CustomInput>
-        </FormGroup>
-      )
-    }
+      <FormGroup>
+        <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
+          <option key="true" value="true" selected={this.props.attribute.filterSelectedValues.includes("true")}>True</option>
+          <option key="false" value="false" selected={this.props.attribute.filterSelectedValues.includes("false")}>False</option>
+        </CustomInput>
+      </FormGroup>
+    )
 
     return (
       <div className="attribute-box">
@@ -353,38 +349,37 @@ export default class AttributeBox extends Component {
     let numberOfFilters = this.props.attribute.filters.length - 1
 
     form = (
-        <table style={{ width: '100%' }}>
-        {this.props.attribute.filters.map((filter, index) => {
-          return (
-            <tr key={index}>
-              <td key={index}>
-                <CustomInput key={index} data-index={index} disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleDateFilter}>
-                  {Object.keys(sign_display).map(sign => {
-                    return <option key={sign} selected={filter.filterSign == sign ? true : false} value={sign}>{sign_display[sign]}</option>
-                  })}
-                </CustomInput>
+      <table style={{ width: '100%' }}>
+      {this.props.attribute.filters.map((filter, index) => {
+        return (
+          <tr key={index}>
+            <td key={index}>
+              <CustomInput key={index} data-index={index} disabled={this.props.attribute.optional} type="select" id={this.props.attribute.id} onChange={this.handleDateFilter}>
+                {Object.keys(sign_display).map(sign => {
+                  return <option key={sign} selected={filter.filterSign == sign ? true : false} value={sign}>{sign_display[sign]}</option>
+                })}
+              </CustomInput>
+            </td>
+              <td>
+                <div className="input-with-icon">
+                  <DatePicker dateFormat="yyyy/MM/dd" disabled={this.props.attribute.optional} id={this.props.attribute.id}
+                  selected={typeof filter.filterValue === 'string' ? Date.parse(filter.filterValue) : filter.filterValue}
+                  isClearable
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  onChange={(date, event) => {
+                      event.target = {value:date, id: this.props.attribute.id, dataset:{index: index}};
+                      this.handleFilterDateValue(event)
+                  }} />
+                  {index == numberOfFilters ? <button className="input-with-icon"><i className="attr-icon fas fa-plus inactive" id={this.props.attribute.id} onClick={this.toggleAddDateFilter}></i></button> : <></>}
+                </div>
               </td>
-                <td>
-                  <div className="input-with-icon">
-                    <DatePicker dateFormat="yyyy/MM/dd" disabled={this.props.attribute.optional} id={this.props.attribute.id}
-                    selected={typeof filter.filterValue === 'string' ? Date.parse(filter.filterValue) : filter.filterValue}
-                    isClearable
-                    showMonthDropdown
-                    showYearDropdown
-                    dropdownMode="select"
-                    onChange={(date, event) => {
-                        event.target = {value:date, id: this.props.attribute.id, dataset:{index: index}};
-                        this.handleFilterDateValue(event)
-                    }} />
-                    {index == numberOfFilters ? <button className="input-with-icon"><i className="attr-icon fas fa-plus inactive" id={this.props.attribute.id} onClick={this.toggleAddDateFilter}></i></button> : <></>}
-                  </div>
-                </td>
-            </tr>
-          )
-        })}
-        </table>
-      )
-    }
+          </tr>
+        )
+      })}
+      </table>
+    )
 
     return (
       <div className="attribute-box">
