@@ -19,8 +19,56 @@ export default class EntityConstraintsModal extends Component {
   constructor (props) {
     super(props)
     this.utils = new Utils()
-    this.state = {}
+    this.state = Object.fromEntries(this.props.entityAttributes.map(attribute => {
+      return [
+        attribute.uri,
+        {constraints: default_constraint(attribute.type)}
+      ]
+    }))
     this.cancelRequest
+  }
+
+  get_uri(id){
+    let attr = this.props.entityAttributes.find(attribute => {
+      return attribute.id == id
+    })
+
+    return attr.uri
+  }
+
+
+  updateGraphState (uri, value) {
+    console.log(this.state)
+    this.setState({[uri]: value})
+  }
+
+
+  toggleVisibility (event) {
+    let uri = get_uri(event.target.id)
+    let newVal = !this.state.entityConstraints[uri]["constraints"]["visible"]
+    let value = { ...this.state[uri], constraints.visible: newVal}
+    this.updateGraphState(uri, value)
+  }
+
+  toggleExclude (event) {
+    let uri = get_uri(event.target.id)
+    let newVal = !this.state.entityConstraints[uri]["constraints"]["exclude"]
+    let value = { ...this.state[uri], constraints.exclude: newVal}
+    this.updateGraphState(uri, value)
+  }
+
+  toggleOptional (event) {
+    let uri = get_uri(event.target.id)
+    let newVal = !this.state.entityConstraints[uri]["constraints"]["optional"]
+    let value = { ...this.state[uri], constraints.optional: newVal}
+    this.updateGraphState(uri, value)
+  }
+
+  handleNegative (event) {
+    let uri = get_uri(event.target.id)
+    let newVal = !this.state.entityConstraints[uri]["constraints"]["negative"]
+    let value = { ...this.state[uri], constraints.negative: newVal}
+    this.updateGraphState(uri, value)
   }
 
   render () {
@@ -34,6 +82,11 @@ export default class EntityConstraintsModal extends Component {
             attribute={attribute}
             config={this.state.config}
             entityUri={this.props.entity.uri}
+            toggleVisibility={p => this.toggleVisibility(p)}
+            toggleExclude={p => this.toggleExclude(p)}
+            handleNegative={p => this.handleNegative(p)}
+            toggleOptional={p => this.toggleOptional(p)}
+            entityUri={this.currentSelected.uri}
           />
         )
       }
@@ -51,5 +104,5 @@ EntityConstraintsModal.propTypes = {
   waitForStart: PropTypes.bool,
   config: PropTypes.object,
   entity: PropTypes.object,
-  attributes: PropTypes.array
+  entityAttributes: PropTypes.array
 }

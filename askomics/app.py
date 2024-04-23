@@ -21,6 +21,7 @@ from askomics.api.view import view_bp
 from askomics.api.results import results_bp
 from askomics.api.galaxy import galaxy_bp
 from askomics.api.ontology import onto_bp
+from askomics.api.constraints import constraints_bp
 from askomics.middleware import PrefixMiddleware
 
 from celery import Celery
@@ -50,7 +51,8 @@ BLUEPRINTS = (
     query_bp,
     results_bp,
     galaxy_bp,
-    onto_bp
+    onto_bp,
+    constraints_bp
 )
 
 

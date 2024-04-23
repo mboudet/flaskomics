@@ -29,7 +29,7 @@ export default class EntityConstraintsBox extends Component {
       <table style={{ width: '100%' }}>
         <tr>
           <td>
-            {this.props.entityConstraint.entityName}
+            {this.props.entityConstraints.entityName}
           </td>
           <td>
             <ButtonGroup>

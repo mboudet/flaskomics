@@ -23,15 +23,6 @@ export default class AttributeBox extends Component {
     this.toggleFormAttribute = this.props.toggleFormAttribute.bind(this)
     this.toggleOptional = this.props.toggleOptional.bind(this)
     this.toggleExclude = this.props.toggleExclude.bind(this)
-    this.handleFilterType = this.props.handleFilterType.bind(this)
-    this.handleFilterValue = this.props.handleFilterValue.bind(this)
-    this.handleFilterCategory = this.props.handleFilterCategory.bind(this)
-    this.handleFilterNumericSign = this.props.handleFilterNumericSign.bind(this)
-    this.handleFilterNumericValue = this.props.handleFilterNumericValue.bind(this)
-    this.handleFilterDateValue = this.props.handleFilterDateValue.bind(this)
-    this.toggleAddNumFilter = this.props.toggleAddNumFilter.bind(this)
-    this.toggleAddDateFilter = this.props.toggleAddDateFilter.bind(this)
-    this.handleDateFilter = this.props.handleDateFilter.bind(this)
     this.cancelRequest
   }
 
@@ -422,15 +413,6 @@ AttributeBox.propTypes = {
   toggleOptional: PropTypes.func,
   toggleFormAttribute: PropTypes.func,
   toggleExclude: PropTypes.func,
-  toggleAddNumFilter: PropTypes.func,
-  handleFilterType: PropTypes.func,
-  handleFilterValue: PropTypes.func,
-  handleFilterCategory: PropTypes.func,
-  handleFilterNumericSign: PropTypes.func,
-  handleFilterNumericValue: PropTypes.func,
-  toggleAddDateFilter: PropTypes.func,
-  handleFilterDateValue: PropTypes.func,
-  handleDateFilter: PropTypes.func,
   attribute: PropTypes.object,
   graph: PropTypes.object,
   config: PropTypes.object,

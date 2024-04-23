@@ -13,6 +13,7 @@ import Switch from 'rc-switch';
 import "rc-switch/assets/index.css";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import EntityConstraintsBox from "./entity_constraints_box"
+import EntityConstraintsModal from "./entity_constraints_modal"
 
 export default class ConstraintOverview extends Component {
 
@@ -45,6 +46,7 @@ export default class ConstraintOverview extends Component {
     this.constraintNodeAttributes = this.constraintNodeAttributes.bind(this)
     this.removeConstraints = this.removeConstraints.bind(this)
     this.editConstraints = this.editConstraints.bind(this)
+    this.toggleModal = this.toggleModal.bind(this)
 
   }
 
@@ -220,8 +222,10 @@ export default class ConstraintOverview extends Component {
   handleRightClick(clickedNode, event) {
     if (this.contextTrigger) {
       this.setState({
-        rightClickedNode: clickedNode
+        rightClickedNode: clickedNode,
+        modal: true
       })
+      console.log(clickedNode)
       this.contextTrigger.handleContextClick(event)
     }
   }
@@ -257,9 +261,16 @@ export default class ConstraintOverview extends Component {
       })
   }
 
+  toggleModal () {
+    this.setState({
+      modal: !this.state.modal
+    })
+  }
+
   render () {
 
     let graph
+    let modal
     let constraintsBoxes
     const highlightNodes = new Set();
     const highlightLinks = new Set();
@@ -321,6 +332,20 @@ export default class ConstraintOverview extends Component {
       </>
     )
 
+    if (this.state.rightClickedNode){
+      modal = (
+        <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
+          <ModalHeader toggle={this.toggleModal}>Constraints</ModalHeader>
+          <ModalBody style={{ display: 'block', height: this.props.divHeight + 'px', 'overflow-y': 'auto' }}>
+            <EntityConstraintsModal entity={rightClickedNode} entityAttributes={this.state.abstraction.attributes}/>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="secondary" onClick={this.toggleModal}>Close</Button>
+          </ModalFooter>
+        </Modal>
+      )
+    }
+
     return (
       <div className="container">
         <h2>Abstraction visualization</h2>
@@ -339,6 +364,7 @@ export default class ConstraintOverview extends Component {
         {constraintsBoxes}
         </Col>
         </Row>
+        {modal}
         <ErrorDiv status={this.state.status} error={this.state.error} errorMessage={this.state.errorMessage}/>
       </div>
     )
