@@ -12,6 +12,8 @@ import { SizeMe } from 'react-sizeme';
 import Switch from 'rc-switch';
 import "rc-switch/assets/index.css";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import EntityConstraintsBox from "./entity_constraints_box"
+import EntityConstraintsModal from "./entity_constraints_modal"
 
 export default class ConstraintOverview extends Component {
 
@@ -27,7 +29,8 @@ export default class ConstraintOverview extends Component {
       highlightNodes: new Set(),
       highlightLinks: new Set(),
       hoverNode: null,
-      rightClickedNode: null
+      rightClickedNode: null,
+      constraints: []
     }
     this.cancelRequest
     this.contextTrigger = null
@@ -41,6 +44,9 @@ export default class ConstraintOverview extends Component {
     this.handleClick = this.handleClick.bind(this)
     this.handleRightClick = this.handleRightClick.bind(this)
     this.constraintNodeAttributes = this.constraintNodeAttributes.bind(this)
+    this.removeConstraints = this.removeConstraints.bind(this)
+    this.editConstraints = this.editConstraints.bind(this)
+    this.toggleModal = this.toggleModal.bind(this)
 
   }
 
@@ -216,8 +222,10 @@ export default class ConstraintOverview extends Component {
   handleRightClick(clickedNode, event) {
     if (this.contextTrigger) {
       this.setState({
-        rightClickedNode: clickedNode
+        rightClickedNode: clickedNode,
+        modal: true
       })
+      console.log(clickedNode)
       this.contextTrigger.handleContextClick(event)
     }
   }
@@ -226,12 +234,59 @@ export default class ConstraintOverview extends Component {
     console.log(data)
   }
 
+  editConstraints (event){
+    console.log(event.target.id)
+    // Should display modal of specific entity
+  }
+
+  removeConstraints (event) {
+    // request api to get a preview of file
+    let requestUrl = '/api/constraints/' + event.target.id
+    axios.delete(requestUrl, {baseURL: this.props.config.proxyPath, cancelToken: new axios.CancelToken((c) => { this.cancelRequest = c }) })
+      .then(response => {
+        console.log(requestUrl, response.data)
+        // set state of resultsPreview
+        this.setState({
+          constraints: response.data.constraints
+        })
+      })
+      .catch(error => {
+        console.log(error, error.response.data.errorMessage)
+        this.setState({
+          error: true,
+          errorMessage: error.response.data.errorMessage,
+          status: error.response.status,
+          waiting: false
+        })
+      })
+  }
+
+  toggleModal () {
+    this.setState({
+      modal: !this.state.modal
+    })
+  }
+
   render () {
 
     let graph
+    let modal
+    let constraintsBoxes
     const highlightNodes = new Set();
     const highlightLinks = new Set();
     let hoverNode = null;
+
+    constraintsBoxes = this.state.constraints.map(entityConstraints => {
+      return (
+        <EntityConstraintsBox
+          key={entityConstraints.id}
+          entityConstraints={entityConstraints}
+          removeConstraints={p => this.removeConstraints(p)}
+          editConstraints={p => this.editConstraints(p)}
+        />
+      )
+    })
+
 
     if (this.state.graphState.nodes.length == 0) {
       return (
@@ -270,23 +325,46 @@ export default class ConstraintOverview extends Component {
 
         <ContextMenu id="context-menu-1">
           <MenuItem data={{node: this.state.rightClickedNode}} onClick={this.constraintNodeAttributes}>
-            Constraint node attributes
+            Constraint entity attributes
           </MenuItem>
         </ContextMenu>
       </div>
       </>
     )
 
+    if (this.state.rightClickedNode){
+      modal = (
+        <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
+          <ModalHeader toggle={this.toggleModal}>Constraints</ModalHeader>
+          <ModalBody style={{ display: 'block', height: this.props.divHeight + 'px', 'overflow-y': 'auto' }}>
+            <EntityConstraintsModal entity={rightClickedNode} entityAttributes={this.state.abstraction.attributes}/>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="secondary" onClick={this.toggleModal}>Close</Button>
+          </ModalFooter>
+        </Modal>
+      )
+    }
+
     return (
       <div className="container">
         <h2>Abstraction visualization</h2>
         <hr />
+        <Row>
+        <Col xs="7">
         Drag and scroll to interact with the graph. Click on a node to focus.
         <Button style={{float: "right"}} onClick={this.zoomOut}>Reset zoom</Button>
         <br/>
         <WaitingDiv waiting={this.state.waiting} center />
         <br />
         {graph}
+        </Col>
+        <Col xs="5">
+        <h4>Constrained entities</h4>
+        {constraintsBoxes}
+        </Col>
+        </Row>
+        {modal}
         <ErrorDiv status={this.state.status} error={this.state.error} errorMessage={this.state.errorMessage}/>
       </div>
     )
