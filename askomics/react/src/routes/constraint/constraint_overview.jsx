@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import { Alert, Button, CustomInput, Row, Col, ButtonGroup, Input, Spinner, ButtonToolbar } from 'reactstrap'
+import { Alert, Button, CustomInput, Row, Col, ButtonGroup, Modal, ModalHeader, ModalBody, ModalFooter, Input, Spinner, ButtonToolbar } from 'reactstrap'
 import { Redirect } from 'react-router-dom'
 import ErrorDiv from '../error/error'
 import WaitingDiv from '../../components/waiting'
@@ -223,7 +223,6 @@ export default class ConstraintOverview extends Component {
     if (this.contextTrigger) {
       this.setState({
         rightClickedNode: clickedNode,
-        modal: true
       })
       console.log(clickedNode)
       this.contextTrigger.handleContextClick(event)
@@ -231,6 +230,9 @@ export default class ConstraintOverview extends Component {
   }
 
   constraintNodeAttributes(event, data){
+    this.setState({
+        modal: true,
+      })
     console.log(data)
   }
 
@@ -332,12 +334,12 @@ export default class ConstraintOverview extends Component {
       </>
     )
 
-    if (this.state.rightClickedNode){
+    if (this.state.modal){
       modal = (
         <Modal isOpen={this.state.modal} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}>Constraints</ModalHeader>
           <ModalBody style={{ display: 'block', height: this.props.divHeight + 'px', 'overflow-y': 'auto' }}>
-            <EntityConstraintsModal entity={rightClickedNode} entityAttributes={this.state.abstraction.attributes}/>
+            <EntityConstraintsModal entityUri={this.state.rightClickedNode.id} entityAttributes={this.state.abstraction.attributes} config={this.props.config}/>
           </ModalBody>
           <ModalFooter>
             <Button color="secondary" onClick={this.toggleModal}>Close</Button>

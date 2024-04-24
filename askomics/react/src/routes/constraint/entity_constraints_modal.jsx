@@ -19,74 +19,88 @@ export default class EntityConstraintsModal extends Component {
   constructor (props) {
     super(props)
     this.utils = new Utils()
-    this.state = Object.fromEntries(this.props.entityAttributes.map(attribute => {
+    this.state = Object.fromEntries(this.props.entityAttributes.filter((attribute) => attribute.entityUri == this.props.entityUri). map(attribute => {
       return [
         attribute.uri,
-        {constraints: default_constraint(attribute.type)}
+        {constraints: this.get_default_constraints()}
       ]
     }))
     this.cancelRequest
   }
 
+
+  get_default_constraints(){
+    return {
+      optional: false,
+      visible: true,
+      negative: false,
+      filterType: 'exact',
+      filterValue: '',
+      filters: [],
+      filterValues: [],
+    }
+  }
+
+
+
   get_uri(id){
     let attr = this.props.entityAttributes.find(attribute => {
       return attribute.id == id
     })
-
     return attr.uri
   }
 
 
   updateGraphState (uri, value) {
     console.log(this.state)
-    this.setState({[uri]: value})
+    this.setState({[uri]: {constraints: value}})
   }
 
 
   toggleVisibility (event) {
     let uri = get_uri(event.target.id)
     let newVal = !this.state.entityConstraints[uri]["constraints"]["visible"]
-    let value = { ...this.state[uri], constraints.visible: newVal}
+    let value = { ...this.state[uri].constraints, visible: newVal}
     this.updateGraphState(uri, value)
   }
 
   toggleExclude (event) {
     let uri = get_uri(event.target.id)
     let newVal = !this.state.entityConstraints[uri]["constraints"]["exclude"]
-    let value = { ...this.state[uri], constraints.exclude: newVal}
+    let value = { ...this.state[uri].constraints, exclude: newVal}
     this.updateGraphState(uri, value)
   }
 
   toggleOptional (event) {
     let uri = get_uri(event.target.id)
     let newVal = !this.state.entityConstraints[uri]["constraints"]["optional"]
-    let value = { ...this.state[uri], constraints.optional: newVal}
+    let value = { ...this.state[uri].constraints, optional: newVal}
     this.updateGraphState(uri, value)
   }
 
   handleNegative (event) {
     let uri = get_uri(event.target.id)
     let newVal = !this.state.entityConstraints[uri]["constraints"]["negative"]
-    let value = { ...this.state[uri], constraints.negative: newVal}
+    let value = { ...this.state[uri].constraints, negative: newVal}
     this.updateGraphState(uri, value)
   }
 
   render () {
     let AttributeBoxes
 
-    AttributeBoxes = this.props.attributes.map(attribute => {
-      if (attribute.nodeId == this.props.entity.id) {
+    AttributeBoxes = this.props.entityAttributes.map(attribute => {
+      if (attribute.entityUri == this.props.entityUri) {
         return (
           <AttributeBox
             key={attribute.id}
             attribute={attribute}
-            config={this.state.config}
-            entityUri={this.props.entity.uri}
+            config={this.props.config}
             toggleVisibility={p => this.toggleVisibility(p)}
             toggleExclude={p => this.toggleExclude(p)}
             handleNegative={p => this.handleNegative(p)}
             toggleOptional={p => this.toggleOptional(p)}
-            entityUri={this.currentSelected.uri}
+            entityUri={this.props.entityUri}
+            constraints={this.state[attribute.uri]['constraints']}
           />
         )
       }
@@ -103,6 +117,6 @@ export default class EntityConstraintsModal extends Component {
 EntityConstraintsModal.propTypes = {
   waitForStart: PropTypes.bool,
   config: PropTypes.object,
-  entity: PropTypes.object,
+  entityUri: PropTypes.string,
   entityAttributes: PropTypes.array
 }

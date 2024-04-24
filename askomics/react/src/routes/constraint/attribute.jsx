@@ -6,7 +6,6 @@ import DatePicker from "react-datepicker";
 import ErrorDiv from '../error/error'
 import WaitingDiv from '../../components/waiting'
 import update from 'react-addons-update'
-import Visualization from './visualization'
 import PropTypes from 'prop-types'
 import Utils from '../../classes/utils'
 import Autocomplete from '../../components/autocomplete'
@@ -20,7 +19,6 @@ export default class AttributeBox extends Component {
 
     this.toggleVisibility = this.props.toggleVisibility.bind(this)
     this.handleNegative = this.props.handleNegative.bind(this)
-    this.toggleFormAttribute = this.props.toggleFormAttribute.bind(this)
     this.toggleOptional = this.props.toggleOptional.bind(this)
     this.toggleExclude = this.props.toggleExclude.bind(this)
     this.cancelRequest
@@ -42,6 +40,27 @@ export default class AttributeBox extends Component {
       return this.props.config.ontologies.some(onto => {
         return (onto.uri == this.props.entityUri && onto.type != "none")
       })
+  }
+
+  getAttributeType () {
+    // FIXME: don't hardcode uri
+    let typeUri = this.props.attribute.type
+
+    if (typeUri == 'http://www.w3.org/2001/XMLSchema#decimal') {
+      return 'decimal'
+    }
+    if (typeUri == this.props.config.namespaceInternal + 'AskomicsCategory') {
+      return 'category'
+    }
+    if (typeUri == 'http://www.w3.org/2001/XMLSchema#string') {
+      return 'text'
+    }
+    if (typeUri == "http://www.w3.org/2001/XMLSchema#boolean") {
+      return "boolean"
+    }
+    if (typeUri == "http://www.w3.org/2001/XMLSchema#date") {
+      return "date"
+    }
   }
 
   checkUnvalidUri (value) {
@@ -104,21 +123,20 @@ export default class AttributeBox extends Component {
       )
       if (this.isRegisteredOnto() && this.props.attribute.uri == "rdfs:label"){
         input = (
-          <Autocomplete config={this.props.config} entityUri={this.props.entityUri} attributeId={this.props.attribute.id} filterValue={this.props.attribute.filterValue} handleFilterValue={p => this.handleFilterValue(p)}/>
+          <Autocomplete config={this.props.config} entityUri={this.props.entityUri} attributeId={this.props.attribute.id} filterValue={this.props.constraints.filterValue} handleFilterValue={p => this.handleFilterValue(p)}/>
         )
       } else {
-        input = (<Input disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={this.props.attribute.filterValue} onChange={this.handleFilterValue} />)
+        input = (<Input disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={this.props.constraints.filterValue} onChange={this.handleFilterValue} />)
       }
 
     } else {
       attrIcons = (
         <div className="attr-icons">
-          {this.props.config.user.admin ? <i className={formIcon} id={this.props.attribute.id} onClick={this.toggleFormAttribute}></i> : <nodiv></nodiv>}
           {this.props.attribute.uri == "rdf:type" || this.props.attribute.uri == "rdfs:label" ? <nodiv></nodiv> : <i className={optionalIcon} id={this.props.attribute.id} onClick={this.toggleOptional}></i> }
           <i className={eyeIcon} id={this.props.attribute.id} onClick={this.toggleVisibility}></i>
         </div>
       )
-      input = (<Input disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={this.props.attribute.filterValue} onChange={this.handleFilterValue} />)
+      input = (<Input disabled={this.props.attribute.optional} type="text" id={this.props.attribute.id} value={this.props.constraints.filterValue} onChange={this.handleFilterValue} />)
     }
 
     form = (
@@ -181,11 +199,11 @@ export default class AttributeBox extends Component {
     }
 
     let form
-    let numberOfFilters = this.props.attribute.filters.length - 1
+    let numberOfFilters = this.props.constraints.filters.length - 1
 
     form = (
       <table style={{ width: '100%' }}>
-      {this.props.attribute.filters.map((filter, index) => {
+      {this.props.constraints.filters.map((filter, index) => {
         return (
           <tr key={index}>
             <td key={index}>
@@ -211,7 +229,6 @@ export default class AttributeBox extends Component {
       <div className="attribute-box">
         <label className="attr-label">{this.props.attribute.label}</label>
         <div className="attr-icons">
-          {this.props.config.user.admin ? <i className={formIcon} id={this.props.attribute.id} onClick={this.toggleFormAttribute}></i> : <nodiv></nodiv>}
           <i className={optionalIcon} id={this.props.attribute.id} onClick={this.toggleOptional}></i>
           <i className={eyeIcon} id={this.props.attribute.id} onClick={this.toggleVisibility}></i>
         </div>
@@ -247,8 +264,8 @@ export default class AttributeBox extends Component {
     form = (
       <FormGroup>
         <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
-          {this.props.attribute.filterValues.map(value => {
-            let selected = this.props.attribute.filterSelectedValues.includes(value.uri)
+          {this.props.constraints.filterValues.map(value => {
+            let selected = this.props.constraints.filterselectedValues.includes(value.uri)
             return (<option key={value.uri} value={value.uri} selected={selected}>{value.label}</option>)
           })}
         </CustomInput>
@@ -259,7 +276,6 @@ export default class AttributeBox extends Component {
       <div className="attribute-box">
         <label className="attr-label">{this.props.attribute.label}</label>
         <div className="attr-icons">
-          {this.props.config.user.admin ? <i className={formIcon} id={this.props.attribute.id} onClick={this.toggleFormAttribute}></i> : <nodiv></nodiv>}
           <i className={optionalIcon} id={this.props.attribute.id} onClick={this.toggleOptional}></i>
           <i className={excludeIcon} id={this.props.attribute.id} onClick={this.toggleExclude}></i>
           <i className={eyeIcon} id={this.props.attribute.id} onClick={this.toggleVisibility}></i>
@@ -291,8 +307,8 @@ export default class AttributeBox extends Component {
     form = (
       <FormGroup>
         <CustomInput disabled={this.props.attribute.optional} style={{ height: '60px' }} className="attr-select" type="select" id={this.props.attribute.id} onChange={this.handleFilterCategory} multiple>
-          <option key="true" value="true" selected={this.props.attribute.filterSelectedValues.includes("true")}>True</option>
-          <option key="false" value="false" selected={this.props.attribute.filterSelectedValues.includes("false")}>False</option>
+          <option key="true" value="true" selected={this.props.constraints.filterselectedValues.includes("true")}>True</option>
+          <option key="false" value="false" selected={this.props.constraints.filterselectedValues.includes("false")}>False</option>
         </CustomInput>
       </FormGroup>
     )
@@ -301,7 +317,6 @@ export default class AttributeBox extends Component {
       <div className="attribute-box">
         <label className="attr-label">{this.props.attribute.label}</label>
         <div className="attr-icons">
-          {this.props.config.user.admin ? <i className={formIcon} id={this.props.attribute.id} onClick={this.toggleFormAttribute}></i> : <nodiv></nodiv>}
           <i className={optionalIcon} id={this.props.attribute.id} onClick={this.toggleOptional}></i>
           <i className={eyeIcon} id={this.props.attribute.id} onClick={this.toggleVisibility}></i>
         </div>
@@ -337,11 +352,11 @@ export default class AttributeBox extends Component {
       '!=': '≠'
     }
     let form
-    let numberOfFilters = this.props.attribute.filters.length - 1
+    let numberOfFilters = this.props.constraints.filters.length - 1
 
     form = (
       <table style={{ width: '100%' }}>
-      {this.props.attribute.filters.map((filter, index) => {
+      {this.props.constraints.filters.map((filter, index) => {
         return (
           <tr key={index}>
             <td key={index}>
@@ -376,7 +391,6 @@ export default class AttributeBox extends Component {
       <div className="attribute-box">
         <label className="attr-label">{this.props.attribute.label}</label>
         <div className="attr-icons">
-          {this.props.config.user.admin ? <i className={formIcon} id={this.props.attribute.id} onClick={this.toggleFormAttribute}></i> : <nodiv></nodiv>}
           <i className={optionalIcon} id={this.props.attribute.id} onClick={this.toggleOptional}></i>
           <i className={eyeIcon} id={this.props.attribute.id} onClick={this.toggleVisibility}></i>
         </div>
@@ -388,21 +402,25 @@ export default class AttributeBox extends Component {
 
   render () {
     let box = null
-    if (this.props.attribute.type == 'text' || this.props.attribute.type == 'uri') {
+
+    let type = this.getAttributeType()
+
+    if (type == 'text' || type == 'uri') {
       box = this.renderText()
     }
-    if (this.props.attribute.type == 'decimal') {
+    if (type == 'decimal') {
       box = this.renderNumeric()
     }
-    if (this.props.attribute.type == 'category') {
+    if (type == 'category') {
       box = this.renderCategory()
     }
-    if (this.props.attribute.type == 'boolean') {
+    if (type == 'boolean') {
       box = this.renderBoolean()
     }
-    if (this.props.attribute.type == 'date') {
+    if (type == 'date') {
       box = this.renderDate()
     }
+    console.log(this.props.attribute)
     return box
   }
 }
@@ -411,11 +429,11 @@ AttributeBox.propTypes = {
   handleNegative: PropTypes.func,
   toggleVisibility: PropTypes.func,
   toggleOptional: PropTypes.func,
-  toggleFormAttribute: PropTypes.func,
   toggleExclude: PropTypes.func,
   attribute: PropTypes.object,
   graph: PropTypes.object,
   config: PropTypes.object,
   isOnto: PropTypes.bool,
   entityUri: PropTypes.string,
+  constraints: PropTypes.object
 }
