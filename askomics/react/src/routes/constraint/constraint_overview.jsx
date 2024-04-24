@@ -30,11 +30,15 @@ export default class ConstraintOverview extends Component {
       highlightLinks: new Set(),
       hoverNode: null,
       rightClickedNode: null,
-      constraints: []
+      saved_constraints: [],
+      constraints: {}
     }
     this.cancelRequest
     this.contextTrigger = null
     this.firstRender = true
+
+    this.constraints = {}
+
     this.myRef = React.createRef();
     this.draw2DNode = this.draw2DNode.bind(this)
     this.getUniqueLinkId = this.getUniqueLinkId.bind(this)
@@ -164,7 +168,24 @@ export default class ConstraintOverview extends Component {
     return link.uri + link.target.id + link.source.id
   }
 
-
+  getAttributeType (typeUri) {
+    // FIXME: don't hardcode uri
+    if (typeUri == 'http://www.w3.org/2001/XMLSchema#decimal') {
+      return 'decimal'
+    }
+    if (typeUri == this.state.config.namespaceInternal + 'AskomicsCategory') {
+      return 'category'
+    }
+    if (typeUri == 'http://www.w3.org/2001/XMLSchema#string') {
+      return 'text'
+    }
+    if (typeUri == "http://www.w3.org/2001/XMLSchema#boolean") {
+      return "boolean"
+    }
+    if (typeUri == "http://www.w3.org/2001/XMLSchema#date") {
+      return "date"
+    }
+  }
   // ------------------------------------------------
 
   componentDidMount () {
@@ -224,16 +245,111 @@ export default class ConstraintOverview extends Component {
       this.setState({
         rightClickedNode: clickedNode,
       })
-      console.log(clickedNode)
       this.contextTrigger.handleContextClick(event)
     }
   }
 
+  nodeHaveInstancesWithLabel (uri) {
+    return this.state.abstraction.entities.some(entity => {
+      return (entity.uri == uri && entity.instancesHaveLabels)
+    })
+  }
+
+  nodeHaveDefaultVisibleAttribute (uri) {
+      return this.state.abstraction.entities.flatMap(entity => {
+        return (entity.uri == uri && entity.defaultVisible) ? [entity.defaultVisible] : []
+      })
+  }
+
+  generate_default_entity_constraints(uri){
+    let nodeAttributes = {}
+
+    let labelExist = this.nodeHaveInstancesWithLabel(uri)
+    let defaultVisible = this.nodeHaveDefaultVisibleAttribute(uri)
+
+    nodeAttributes['rdf:type'] = {
+      visible: !(labelExist || defaultVisible.length),
+      uri: 'rdf:type',
+      type: 'uri',
+      faldo: false,
+      filterType: 'exact',
+      filterValue: '',
+      optional: false,
+      negative: false,
+    })
+
+    // create label attributes
+    if (labelExist && !defaultVisible.length) {
+      nodeAttributes['rdfs:label'] = {
+        visible: true,
+        uri: 'rdfs:label',
+        type: 'text',
+        filterType: 'exact',
+        filterValue: '',
+        optional: false,
+        negative: false,
+      }
+    }
+
+    // create other attributes
+    nodeAttributes = nodeAttributes.concat(this.state.abstraction.attributes.filter((attr) => attr.entityUri == nodeUri).map(attr => {
+      let attributeType = this.getAttributeType(attr.type)
+      let nodeAttribute = {
+        visible: defaultVisible.includes(attr.uri),
+        uri: attr.uri,
+        label: attr.label,
+        type: attributeType,
+        optional: false,
+        negative: false,
+      }
+      if (attributeType == 'decimal') {
+        nodeAttribute.filters = [
+          {
+            filterValue: "",
+            filterSign: "=",
+            filterModifier: "+"
+          }
+        ]
+      }
+      if (attributeType == 'text') {
+        nodeAttribute.filterType = 'exact'
+        nodeAttribute.filterValue = ''
+      }
+
+      if (attributeType == 'category') {
+        nodeAttribute.exclude = false
+        nodeAttribute.filterValues = attr.categories
+        nodeAttribute.filterSelectedValues = []
+      }
+
+      if (attributeType == 'boolean') {
+        nodeAttribute.filterValues = ["true", "false"]
+        nodeAttribute.filterSelectedValues = []
+      }
+      if (attributeType == 'date') {
+        nodeAttribute.filters = [
+          {
+            filterValue: null,
+            filterSign: "=",
+            filterModifier: "+"
+          }
+        ]
+      }
+      nodeAttributes[attr.uri] = nodeAttribute
+    }))
+
+    return nodeAttributes
+  }
+
   constraintNodeAttributes(event, data){
+    let uri = this.state.rightClickedNode.id
+    if (! this.constraints[this.state.rightClickedNode.id][uri]){
+      this.constraints[this.state.rightClickedNode.id][uri] = generate_default_entity_constraints(uri)
+    }
     this.setState({
         modal: true,
+        constraints: this.constraints
       })
-    console.log(data)
   }
 
   editConstraints (event){
@@ -261,6 +377,41 @@ export default class ConstraintOverview extends Component {
           waiting: false
         })
       })
+  }
+
+  get_uri(id){
+    let attr = this.props.entityAttributes.find(attribute => {
+      return attribute.id == id
+    })
+    return attr.uri
+  }
+
+  updateGraphState () {
+    this.setState({constraints: this.constraints})
+  }
+
+  toggleVisibility (event) {
+    let uri = event.target.id
+    this.constraints[this.state.rightClickedNode.id][uri]["visible"] = !this.constraints[this.state.rightClickedNode.id][uri]["visible"]
+    this.updateGraphState()
+  }
+
+  toggleExclude (event) {
+    let uri = event.target.id
+    this.constraints[this.state.rightClickedNode.id][uri]["exclude"] = !this.constraints[this.state.rightClickedNode.id][uri]["exclude"]
+    this.updateGraphState()
+  }
+
+  toggleOptional (event) {
+    let uri = event.target.id
+    this.constraints[this.state.rightClickedNode.id][uri]["optional"] = !this.constraints[this.state.rightClickedNode.id][uri]["optional"]
+    this.updateGraphState()
+  }
+
+  handleNegative (event) {
+    let uri = event.target.id
+    this.constraints[this.state.rightClickedNode.id][uri]["negative"] = !this.constraints[this.state.rightClickedNode.id][uri]["negative"]
+    this.updateGraphState()
   }
 
   toggleModal () {

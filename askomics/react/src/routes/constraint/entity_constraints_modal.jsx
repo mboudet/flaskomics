@@ -29,62 +29,6 @@ export default class EntityConstraintsModal extends Component {
   }
 
 
-  get_default_constraints(){
-    return {
-      optional: false,
-      visible: true,
-      negative: false,
-      filterType: 'exact',
-      filterValue: '',
-      filters: [],
-      filterValues: [],
-    }
-  }
-
-
-
-  get_uri(id){
-    let attr = this.props.entityAttributes.find(attribute => {
-      return attribute.id == id
-    })
-    return attr.uri
-  }
-
-
-  updateGraphState (uri, value) {
-    console.log(this.state)
-    this.setState({[uri]: {constraints: value}})
-  }
-
-
-  toggleVisibility (event) {
-    let uri = get_uri(event.target.id)
-    let newVal = !this.state.entityConstraints[uri]["constraints"]["visible"]
-    let value = { ...this.state[uri].constraints, visible: newVal}
-    this.updateGraphState(uri, value)
-  }
-
-  toggleExclude (event) {
-    let uri = get_uri(event.target.id)
-    let newVal = !this.state.entityConstraints[uri]["constraints"]["exclude"]
-    let value = { ...this.state[uri].constraints, exclude: newVal}
-    this.updateGraphState(uri, value)
-  }
-
-  toggleOptional (event) {
-    let uri = get_uri(event.target.id)
-    let newVal = !this.state.entityConstraints[uri]["constraints"]["optional"]
-    let value = { ...this.state[uri].constraints, optional: newVal}
-    this.updateGraphState(uri, value)
-  }
-
-  handleNegative (event) {
-    let uri = get_uri(event.target.id)
-    let newVal = !this.state.entityConstraints[uri]["constraints"]["negative"]
-    let value = { ...this.state[uri].constraints, negative: newVal}
-    this.updateGraphState(uri, value)
-  }
-
   render () {
     let AttributeBoxes
 
