@@ -536,20 +536,28 @@ class TriplestoreExplorer(Params):
                 OPTIONAL {{?node askomics:uri ?new_property_uri}}
                 BIND( IF(isBlank(?node), ?new_property_uri, ?node) as ?property_uri)
                 OPTIONAL {{?node askomics:isRecursive ?is_recursive}}
+
+                ?node rdfs:range ?direct_range_uri .
+                ?node rdfs:domain ?direct_domain_uri .
             }}
-            # Relation of entity (or motherclass of entity)
+            # Separate scope for subclass resolution of range
             {{
-                ?node rdfs:domain ?mother .
-                ?entity_uri rdfs:subClassOf+ ?mother .
+                SELECT ?direct_range_uri ?range_uri WHERE {{
+                    ?range_uri rdfs:subClassOf* ?direct_range_uri .
+                }}
             }} UNION {{
-                ?node rdfs:domain ?entity_uri .
+                BIND(?direct_range_uri AS ?range_uri)
             }}
+
+            # Separate scope for subclass resolution of domain
             {{
-                ?node rdfs:range ?mother_range .
-                ?range_uri rdfs:subClassOf+ ?mother_range .
+                SELECT ?direct_domain_uri ?entity_uri WHERE {{
+                    ?entity_uri rdfs:subClassOf* ?direct_domain_uri .
+                }}
             }} UNION {{
-                ?node rdfs:range ?range_uri .
+                BIND(?direct_domain_uri AS ?entity_uri)
             }}
+            FILTER(BOUND(?entity_uri) && BOUND(?range_uri))
             FILTER (
                 ?public = <true>{}
             )
