@@ -26,6 +26,10 @@ This changelog was started for release 4.2.0.
 - Fixed 'phantom' relations created by indirect relations
 - Added a way to select GFF attributes (9th column) during integration
 
+### Fixed
+
+- Inheritance should now properly show relations targeting the inherited node, and not only relations starting from it
+- Should also work on multiple inheritance level
 
 ## [4.5.0] - 2023-10-20
 

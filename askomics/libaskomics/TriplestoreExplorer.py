@@ -433,7 +433,7 @@ class TriplestoreExplorer(Params):
             # Attribute of entity (or motherclass of entity)
             {{
                 ?node rdfs:domain ?mother .
-                ?entity_uri rdfs:subClassOf ?mother .
+                ?entity_uri rdfs:subClassOf+ ?mother .
             }} UNION {{
                 ?node rdfs:domain ?entity_uri .
             }}
@@ -531,7 +531,6 @@ class TriplestoreExplorer(Params):
                 ?node a owl:ObjectProperty .
                 ?node a askomics:AskomicsRelation .
                 ?node rdfs:label ?property_label .
-                ?node rdfs:range ?range_uri .
                 OPTIONAL {{ ?node askomics:isIndirectRelation ?indirect_relation . }}
                 # Retrocompatibility
                 OPTIONAL {{?node askomics:uri ?new_property_uri}}
@@ -541,9 +540,15 @@ class TriplestoreExplorer(Params):
             # Relation of entity (or motherclass of entity)
             {{
                 ?node rdfs:domain ?mother .
-                ?entity_uri rdfs:subClassOf ?mother .
+                ?entity_uri rdfs:subClassOf+ ?mother .
             }} UNION {{
                 ?node rdfs:domain ?entity_uri .
+            }}
+            {{
+                ?node rdfs:range ?mother_range .
+                ?range_uri rdfs:subClassOf+ ?mother_range .
+            }} UNION {{
+                ?node rdfs:range ?range_uri .
             }}
             FILTER (
                 ?public = <true>{}
